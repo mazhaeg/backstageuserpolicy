@@ -1,3 +1,4 @@
+apiVersion: backstage.io/v1beta1
 PermissionPolicy: DemoPolicy
 Dependencies:
   PermissionPolicy: "@backstage/plugin-permission-common"
