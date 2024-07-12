@@ -1,38 +1,41 @@
 apiVersion: backstage.io/v1beta1
-PermissionPolicy: DemoPolicy
-Dependencies:
-  PermissionPolicy: "@backstage/plugin-permission-common"
-  PolicyAuthorizeQuery: "@backstage/plugin-permission-common"
-  PolicyDecision: "@backstage/plugin-permission-common"
-  BackstageIdentityResponse: "@backstage/plugin-auth-backend"
-  createCatalogPolicyDecision: "@backstage/plugin-catalog-backend"
-  catalogConditions: "@backstage/plugin-catalog-backend"
-ClassDefinition:
-  ClassName: DemoPolicy
-  ConstructorParams:
-    userGroupMap: "Map<string, string[]>"
-  Methods:
-    handle:
-      Params:
-        - name: request
-          type: PolicyAuthorizeQuery
-        - name: user
-          type: BackstageIdentityResponse
-          optional: true
-      ReturnType: "Promise<PolicyDecision>"
-      Logic:
-        CheckPermission:
-          Condition: "request.permission.name === 'catalog.entity.view'"
-          Logic:
-            GetUserGroups: "user?.groups ?? []"
-            GetEntityOwnerId: "request.entity.metadata?.annotations?.['backstage.io/created-by']"
-            Condition: "entityOwnerId"
+kind: PermissionPolicy
+metadata:
+  name: DemoPolicy
+spec:
+  Dependencies:
+    PermissionPolicy: "@backstage/plugin-permission-common"
+    PolicyAuthorizeQuery: "@backstage/plugin-permission-common"
+    PolicyDecision: "@backstage/plugin-permission-common"
+    BackstageIdentityResponse: "@backstage/plugin-auth-backend"
+    createCatalogPolicyDecision: "@backstage/plugin-catalog-backend"
+    catalogConditions: "@backstage/plugin-catalog-backend"
+  ClassDefinition:
+    ClassName: DemoPolicy
+    ConstructorParams:
+      userGroupMap: "Map<string, string[]>"
+    Methods:
+      handle:
+        Params:
+          - name: request
+            type: PolicyAuthorizeQuery
+          - name: user
+            type: BackstageIdentityResponse
+            optional: true
+        ReturnType: "Promise<PolicyDecision>"
+        Logic:
+          CheckPermission:
+            Condition: "request.permission.name === 'catalog.entity.view'"
             Logic:
-              GetEntityOwnerGroups: "this.userGroupMap.get(entityOwnerId) ?? []"
-              CheckCommonGroup: "userGroups.some(group => entityOwnerGroups.includes(group))"
-              Condition: "hasCommonGroup"
+              GetUserGroups: "user?.groups ?? []"
+              GetEntityOwnerId: "request.entity.metadata?.annotations?.['backstage.io/created-by']"
+              Condition: "entityOwnerId"
               Logic:
-                Return:
-                  result: "ALLOW"
-        DefaultReturn:
-          result: "DENY"
+                GetEntityOwnerGroups: "this.userGroupMap.get(entityOwnerId) ?? []"
+                CheckCommonGroup: "userGroups.some(group => entityOwnerGroups.includes(group))"
+                Condition: "hasCommonGroup"
+                Logic:
+                  Return:
+                    result: "ALLOW"
+          DefaultReturn:
+            result: "DENY"
